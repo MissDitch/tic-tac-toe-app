@@ -58,6 +58,11 @@ body {
     flex-direction: row;
     //height: 50px;
 }
+.device__turn > div {
+   // background: rgba(175, 4, 208, 0.9);
+    padding: 0 3px;
+    height: 43%;
+}
 .device__reset {
     height: 7%;
     //height: 38px;
