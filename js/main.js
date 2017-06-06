@@ -7,6 +7,7 @@ var game;
 
 function Board() {
   var self = this,
+  finished = false,
   getPosition = function(e) {  // click handler for board
       var int, icon, cell = e.target;
       int = cell.id;
@@ -83,27 +84,8 @@ function Game() {
     playerOne,
     playerTwo,
     counter = 0,
-    scores = [0, 0];
-    askUser = function(oneHuman) {
-        var el = document.querySelectorAll(".device__message");
-        el[0].style.display = "block";
-        el[0].setAttribute("class", "device__message active");
-        if (!self.playersChosen) {
-            el[0].innerHTML = '<h3>Choose your opponent</h3><div id="playerChoice"><div id="oppHuman" class="button">Another human</div><div id="oppComputer" class="button">Computer</div> </div>';
-            listener("add", "id", "oppHuman", setPlayers);
-            listener("add", "id", "oppComputer", setPlayers);
-        }
-        else {
-            if (oneHuman) {
-                el[0].innerHTML = '<h3>Do you want X or O?</h3>';
-            } else {
-                el[0].innerHTML = '<h3>Player 1: <br>Do you want X or O?</h3>';
-            }
-            el[0].innerHTML += '<div id="iconChoice"><div id="x" class="button">X</div><div id="o" class="button">O</div> </div>';
-            listener("add", "id", "x", setIcons);
-            listener("add", "id", "o", setIcons);
-        }
-    },
+    scores = [0, 0],
+
     setPlayers = function(e) {
         var el = e.target;
         showOnDevice("Player 1", "player1");
@@ -130,7 +112,7 @@ function Game() {
         el.style.display = "none";
         el.setAttribute("class", "device__message");
         el.innerHTML = "";
-        self.createPlayers();
+        createPlayers();
     },
     createPlayers = function() {
         var name1, name2, icon1, icon2, level;
@@ -150,64 +132,13 @@ function Game() {
         self.board.playerOnePlays = (Math.ceil(Math.random()*10) % 2) === 0;
         self.nextTurn();
     },
-    nextTurn = function() {
-        var int, el  = document.getElementById("turn"), timeOutID, timeOutID2;
-        el.textContent = "";
-          timeOutID = setTimeout(function() {
-              if (self.board.playerOnePlays) {
-                  self.oneHuman ? el.textContent = "Your turn!" : el.textContent = "Player 1's turn!";
-                  enableClick();
-                  self.playerOne.makeMove();
-              } else {
-                  if (self.oneHuman) {
-                      el.textContent = "Computer's turn!";
-                      disableClick();
-                      self.playerTwo.makeMove("blind");
-                  } else el.textContent = "Player 2's turn!";
-                  self.playerTwo.makeMove();
-                  // player clicks on board or AI makes next move
-              }
-              el.style.background =  "rgba(255, 165, 0, 0.9)";
-
-        }, 800);
-    },
     disableClick = function() { //disable clicking for player
         for (var i = 0; i < 9; i++) { listener("remove", "id", i, self.board.getPosition); }
     },
     enableClick = function() { //enable clicking for player
         for (var i = 0; i < 9; i++) { listener("add", "id", i, self.board.getPosition); }
-    },
-    showWinner = function(icon, pos1, pos2, pos3) {
-        var winner, timeOutID;
-        document.getElementById(pos1).style.color = "orange";
-        document.getElementById(pos2).style.color = "orange";
-        document.getElementById(pos3).style.color = "orange";
-        if (self.playerOne.getIcon() === icon) {
-          winner = self.playerOne;
-        } else {
-          winner = self.playerTwo;
-        }
-        document.getElementById("turn").textContent = winner.name + " wins!";
-        timeOutID = setTimeout(function() {
-          self.scores[winner.id]++;
-          document.getElementById("score" + (winner.id + 1)).textContent = self.scores[winner.id];
-          disableClick();
-          document.getElementById(pos1).removeAttribute("style");
-          document.getElementById(pos2).removeAttribute("style");
-          document.getElementById(pos3).removeAttribute("style");
-          // next game starts
-          self.newGame();
-        }, 2000);
-    },
-    newGame = function() {
-        console.log("new game starts!");
-        self.board = new Board();
-        self.counter = 0;
-        self.board.matrix.length = 0;
-        // make random decision which player starts
-        self.board.playerOnePlays = (Math.ceil(Math.random()*10) % 2) === 0;
-        self.nextTurn();
     }
+
     this.playerOne = playerOne;
     this.playerTwo = playerTwo;
     this.oneHuman = oneHuman;
@@ -216,60 +147,135 @@ function Game() {
     this.board.matrix = [];
     this.counter = counter;
     this.scores = scores;
-    this.askUser = askUser;
-    this.setPlayers = setPlayers;
-    this.setIcons = setIcons;
-    this.createPlayers = createPlayers;
-    this.nextTurn = nextTurn;
-    this.disableClick = disableClick;
-    this.enableClick = enableClick;
-    this.showWinner = showWinner;
-    this.newGame = newGame;
+    this.askUser = function(oneHuman) {
+        var el = document.querySelectorAll(".device__message");
+        el[0].style.display = "block";
+        el[0].setAttribute("class", "device__message active");
+        if (!self.playersChosen) {
+            el[0].innerHTML = '<h3>Choose your opponent</h3><div id="playerChoice"><div id="oppHuman" class="button">Another human</div><div id="oppComputer" class="button">Computer</div> </div>';
+            listener("add", "id", "oppHuman", setPlayers);
+            listener("add", "id", "oppComputer", setPlayers);
+        }
+        else {
+            if (oneHuman) {
+                el[0].innerHTML = '<h3>Do you want X or O?</h3>';
+            } else {
+                el[0].innerHTML = '<h3>Player 1: <br>Do you want X or O?</h3>';
+            }
+            el[0].innerHTML += '<div id="iconChoice"><div id="x" class="button">X</div><div id="o" class="button">O</div> </div>';
+            listener("add", "id", "x", setIcons);
+            listener("add", "id", "o", setIcons);
+        }
+    };
+    this.nextTurn = function() {
+      if (!self.board.finished) {
+        var int, el  = document.getElementById("turn");
+        el.textContent = "";
+          setTimeout(function() {
+              if (self.board.playerOnePlays) {
+                  self.oneHuman ? el.textContent = "Your turn!" : el.textContent = "Player 1's turn!";
+                  enableClick();
+                  self.playerOne.makeMove();
+              } else {
+                  if (self.oneHuman) {
+                      el.textContent = "Computer's turn!";
+                      disableClick();
+                      self.playerTwo.makeAIMove("blind");
+                  } else { el.textContent = "Player 2's turn!";
+                  self.playerTwo.makeMove();
+                }
+              }
+              el.style.background =  "rgba(255, 165, 0, 0.9)";
+
+        }, 800);
+      } else return;
+    };
+    this.showWinner = function(icon, pos1, pos2, pos3) {
+        var winner;
+        document.getElementById(pos1).style.color = "orange";
+        document.getElementById(pos2).style.color = "orange";
+        document.getElementById(pos3).style.color = "orange";
+
+        if (self.playerOne.getIcon() === icon) {
+          winner = self.playerOne;
+        } else {
+          winner = self.playerTwo;
+        }
+        document.getElementById("turn").textContent = winner.name + " wins!";
+        self.scores[winner.id]++;
+        document.getElementById("score" + (winner.id + 1)).textContent = self.scores[winner.id];
+        disableClick();
+        self.board.finished = true;
+        setTimeout(function() {
+          self.newGame();
+        }, 2000);
+
+    };
+    this.newGame = function() {
+        console.log("new game starts!");
+        self.board = new Board();
+        document.getElementById("turn").textContent = "";
+        for (var i = 0; i < 9; i++) {
+          var el = document.getElementById(i);
+          if (el.hasAttribute("style")) { el.removeAttribute("style"); }
+        }
+        self.counter = 0;
+        self.board.matrix.length = 0;
+        // make random decision which player starts
+        self.board.playerOnePlays = (Math.ceil(Math.random()*10) % 2) === 0;
+        enableClick();
+        self.nextTurn();
+    };
 }
  // end function Game()
 
 function Player(id, name, icon) {
-    makeMove = function() {
-            console.log(this.name + " is playing now");
-            // click on board
-    },
-    getIcon = function() {
-      return this.icon;
-    }
-
     this.id = id;
     this.name = name;
     this.icon = icon;
-    this.getIcon = getIcon;
-    this.makeMove = makeMove;
+
+    this.makeMove = function() {
+        console.log(this.name + " is playing now");
+        // click on board
+    };
+    this.getIcon = function() {
+      return this.icon;
+    };
 }
 
 function AI(id, name, icon, level) {
   var self = this,
   pos,
   //game = {}, //the game the player is playing
-  minimaxValue = function(state) { }, //the state to calculate its minimax value
+  //minimaxValue = function(board) { }, //the state to calculate its minimax value
   takeBlindMove = function() {
     var available = game.board.matrix.filter(function(el, index, arr) {
         return arr.indexOf(el !== undefined);
     });
     console.log(available);
-    pos = Math.ceil(Math.random()* 9 - 1);
-    if (game.board.matrix[pos] === undefined) {
-      game.board.matrix[pos] = self.icon;
-      document.getElementById(pos).textContent = self.icon;
-      game.board.checkIfTerminated(self.icon);
-      game.board.playerOnePlays = true;
+    setTimeout(function() {
+      pos = Math.ceil(Math.random()* 9 - 1);
+      if (game.board.matrix[pos] === undefined) {
+        game.board.matrix[pos] = self.icon;
+        document.getElementById(pos).textContent = self.icon;
+        game.board.checkIfTerminated(self.icon);
+        game.board.playerOnePlays = true;
 
-      game.nextTurn();
-    } else { takeBlindMove(); }
+        game.nextTurn();
+      } else { takeBlindMove(); }
+    }, 1000);
 
-    //alert("blind move");
-  }, //turn: either X or O
+  }
 //  takeNoviceMove  = function(turn) { },
 //  takeMasterMove = function(turn) { }
+  this.id = id;
+  this.name = name;
+  this.icon = icon;
+  this.level = level;
+  this.board = game.board;
 
-  makeMove = function(level) {
+  this.makeAIMove = function(level) {
+    console.log(this.name + " is playing now");
     switch(level) {
       //invoke the desired behavior based on the level chosen
       case "blind": takeBlindMove(); break;
@@ -278,14 +284,9 @@ function AI(id, name, icon, level) {
     //  case "master": takeMasterMove(turn); break;
     }
   },
-  getIcon = function() {
+  this.getIcon = function() {
     return this.icon;
-  }
-  this.id = id;
-  this.name = name;
-  this.icon = icon;
-  this.level = level;
-  this.makeMove = makeMove;
+  };
 }
 
 function showOnDevice(message, selector) {
