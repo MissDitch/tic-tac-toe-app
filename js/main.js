@@ -7,27 +7,20 @@ var game;
 
 function Board() {
   var self = this,
-  finished = false,
   getPosition = function(e) {  // click handler for board
       var int, icon, cell = e.target;
       int = cell.id;
-      if (self.playerOnePlays ) {
-          icon = game.playerOne.getIcon();
-      }
-      else if (!self.playerOnePlays && !game.oneHuman) {
-          icon =  game.playerTwo.getIcon();
-      }
+      if (self.playerOnePlays ) { icon = game.playerOne.getIcon(); }
+      else { icon =  game.playerTwo.getIcon(); }
 
       if (self.matrix[int] !== undefined) { return; }
       else {
           self.matrix[int] = icon;
-          self.counter++;
+          //self.counter++;
           document.getElementById(int).textContent = icon;
-          //self.playerOnePlays ? self.playerOnePlays = false : self.playerOnePlays = true;
           self.playerOnePlays = self.playerOnePlays === true ? false : true;
       }
       self.checkIfTerminated(icon);
-
   },
   checkIfTerminated = function(icon) {
       var timeOutID;
@@ -57,6 +50,7 @@ function Board() {
           return el !== undefined;
       });
       if (filled.length === 9) {
+          this.finished = true;
           document.getElementById("turn").textContent = "It's a tie!";
           timeOutID = setTimeout(function() {
               game.newGame();
@@ -65,13 +59,15 @@ function Board() {
       else {
         game.nextTurn();
       }
-  }
+  };
+
   for (var i = 0; i < 9; i++) {
       document.getElementById(i).textContent = "";
   }
 
   this.matrix = [];
   this.playerOnePlays = false;
+  this.finished = false;
   this.getPosition = getPosition;
   this.checkIfTerminated = checkIfTerminated;
 }
@@ -83,9 +79,12 @@ function Game() {
     oneHuman,
     playerOne,
     playerTwo,
-    counter = 0,
+    //counter = 0,
     scores = [0, 0],
-
+    showOnDevice = function(message, selector) {
+        var el = document.getElementById(selector);
+        el.textContent = message;
+    },
     setPlayers = function(e) {
         var el = e.target;
         showOnDevice("Player 1", "player1");
@@ -115,15 +114,16 @@ function Game() {
         createPlayers();
     },
     createPlayers = function() {
-        var name1, name2, icon1, icon2, level;
-        name1 = "Player 1";
-        icon1 = document.getElementById("icon1").textContent;
+        var name1,
+        name1 = "Player 1",
+        icon1 = document.getElementById("icon1").textContent,
         icon2 = document.getElementById("icon2").textContent;
-        level = "blind";
+
         self.playerOne = new Player(0, name1, icon1);
+
         if (self.oneHuman) {
             name2 = "Computer";
-            self.playerTwo = new AI(1, name2, icon2, level);
+            self.playerTwo = new AI(1, name2, icon2);
         } else {
             name2 = "Player 2";
             self.playerTwo = new Player(1, name2, icon2);
@@ -132,12 +132,12 @@ function Game() {
         self.board.playerOnePlays = (Math.ceil(Math.random()*10) % 2) === 0;
         self.nextTurn();
     },
-    disableClick = function() { //disable clicking for player
+    disableClick = function() { //disable clicking when it's computer's turn
         for (var i = 0; i < 9; i++) { listener("remove", "id", i, self.board.getPosition); }
     },
-    enableClick = function() { //enable clicking for player
+    enableClick = function() {
         for (var i = 0; i < 9; i++) { listener("add", "id", i, self.board.getPosition); }
-    }
+    };
 
     this.playerOne = playerOne;
     this.playerTwo = playerTwo;
@@ -145,7 +145,7 @@ function Game() {
     this.board = board;
     this.board.playerOnePlays = false;
     this.board.matrix = [];
-    this.counter = counter;
+    //this.counter = counter;
     this.scores = scores;
     this.askUser = function(oneHuman) {
         var el = document.querySelectorAll(".device__message");
@@ -157,7 +157,7 @@ function Game() {
             listener("add", "id", "oppComputer", setPlayers);
         }
         else {
-            if (oneHuman) {
+            if (self.oneHuman) {
                 el[0].innerHTML = '<h3>Do you want X or O?</h3>';
             } else {
                 el[0].innerHTML = '<h3>Player 1: <br>Do you want X or O?</h3>';
@@ -175,18 +175,18 @@ function Game() {
               if (self.board.playerOnePlays) {
                   self.oneHuman ? el.textContent = "Your turn!" : el.textContent = "Player 1's turn!";
                   enableClick();
-                  self.playerOne.makeMove();
               } else {
                   if (self.oneHuman) {
                       el.textContent = "Computer's turn!";
                       disableClick();
                       self.playerTwo.makeAIMove("blind");
-                  } else { el.textContent = "Player 2's turn!";
-                  self.playerTwo.makeMove();
-                }
+                      //self.playerTwo.makeAIMove();
+                  } else {
+                    el.textContent = "Player 2's turn!";
+                    enableClick();
+                  }
               }
-              el.style.background =  "rgba(255, 165, 0, 0.9)";
-
+              el.style.color =  "rgba(255, 165, 0, 0.9)";
         }, 800);
       } else return;
     };
@@ -209,17 +209,15 @@ function Game() {
         setTimeout(function() {
           self.newGame();
         }, 2000);
-
     };
     this.newGame = function() {
-        console.log("new game starts!");
         self.board = new Board();
         document.getElementById("turn").textContent = "";
         for (var i = 0; i < 9; i++) {
           var el = document.getElementById(i);
           if (el.hasAttribute("style")) { el.removeAttribute("style"); }
         }
-        self.counter = 0;
+        //self.counter = 0;
         self.board.matrix.length = 0;
         // make random decision which player starts
         self.board.playerOnePlays = (Math.ceil(Math.random()*10) % 2) === 0;
@@ -227,32 +225,20 @@ function Game() {
         self.nextTurn();
     };
 }
- // end function Game()
 
 function Player(id, name, icon) {
     this.id = id;
     this.name = name;
     this.icon = icon;
-
-    this.makeMove = function() {
-        console.log(this.name + " is playing now");
-        // click on board
-    };
     this.getIcon = function() {
       return this.icon;
     };
 }
 
-function AI(id, name, icon, level) {
+function AI(id, name, icon) {
   var self = this,
   pos,
-  //game = {}, //the game the player is playing
-  //minimaxValue = function(board) { }, //the state to calculate its minimax value
   takeBlindMove = function() {
-    var available = game.board.matrix.filter(function(el, index, arr) {
-        return arr.indexOf(el !== undefined);
-    });
-    console.log(available);
     setTimeout(function() {
       pos = Math.ceil(Math.random()* 9 - 1);
       if (game.board.matrix[pos] === undefined) {
@@ -260,38 +246,31 @@ function AI(id, name, icon, level) {
         document.getElementById(pos).textContent = self.icon;
         game.board.checkIfTerminated(self.icon);
         game.board.playerOnePlays = true;
-
         game.nextTurn();
       } else { takeBlindMove(); }
-    }, 1000);
+    }, 400);
+  },
+  takeMove = function() {
+    var filled = game.board.matrix.filter(function(el, index, arr) {
+        return el !== undefined;
+    });
+    alert("will have to think about this, my options are not: " + filled);
+  };
 
-  }
-//  takeNoviceMove  = function(turn) { },
-//  takeMasterMove = function(turn) { }
   this.id = id;
   this.name = name;
   this.icon = icon;
-  this.level = level;
   this.board = game.board;
-
+  //this.matrix = game.matrix;
   this.makeAIMove = function(level) {
-    console.log(this.name + " is playing now");
     switch(level) {
-      //invoke the desired behavior based on the level chosen
       case "blind": takeBlindMove(); break;
-
-      //case "novice": takeNoviceMove(turn); break;
-    //  case "master": takeMasterMove(turn); break;
+      default: takeMove(); break;
     }
-  },
+  };
   this.getIcon = function() {
     return this.icon;
   };
-}
-
-function showOnDevice(message, selector) {
-    var el = document.getElementById(selector);
-    el.textContent = message;
 }
 
 function listener(addOrRemove, prop, selector, func) {
@@ -306,14 +285,14 @@ function listener(addOrRemove, prop, selector, func) {
     if (prop === "id") {
         var el = document.getElementById(selector);
         if (op === "add") {  el.addEventListener("click", func); }
-            else if (op === "remove") { el.removeEventListener("click", func); }
+        else if (op === "remove") { el.removeEventListener("click", func); }
     }
 }
 
-
-
 function reset() {
-    document.getElementById("turn").textContent = "Tic-tac-toe";
+    var el = document.getElementById("turn");
+    el.textContent = "Tic-tac-toe";
+    el.style.color = "#ffffff";
     document.getElementById("score1").textContent = "0";
     document.getElementById("score2").textContent = "0";
     for (var i = 0; i < 9; i++) {

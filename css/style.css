@@ -9,12 +9,7 @@ html {
 body {
      //margin: 0;
     text-align: center;
-    font-family: 'Inconsolata', monospace;
     font-family: 'Share Tech', sans-serif;
-    //font-family: 'Ropa Sans', sans-serif;
-    //font-family: 'Audiowide', cursive;
-    //font-family: 'Electrolize', sans-serif;
-    //font-family: 'Iceland', cursive;
     background: #ffffff; /*  */
     color: #ffffff;
 }
@@ -24,7 +19,6 @@ body {
     width: 100%;
     height: 100%;
 }
-
 .button {
     padding: 1rem 1.5rem;
     cursor: pointer;
@@ -57,17 +51,15 @@ body {
     height: 9%;
     padding-top: 5px;
     flex-direction: row;
-    //height: 50px;
 }
 .device__turn > div {
-   // background: rgba(175, 4, 208, 0.9);
     padding: 0 3px;
     height: 43%;
+    font-weight: 600;
 }
 .device__reset {
     height: 7%;
     padding-top: 3px;
-    //height: 38px;
 }
 .device__message {
     background: rgba(0, 0, 0, 1);
@@ -86,29 +78,26 @@ body {
 .active {
     opacity: 0.8;
     display: block;
-
 }
-
 .device__board {
     height: 58%;
-    //height: 320px;
 }
 .device__players {
     height: 20%;
-    //height: 100px;
     justify-content: center;
     align-items: flex-start;
     padding-top: 10px;
 }
-
 .device__board > div {
     display: grid;
     -ms-display: grid;
     grid-template-rows: repeat(3, 75px);
+    -ms-grid-template-rows: repeat(3, 75px);
     grid-template-columns: repeat(3, 75px);
+    -ms-grid-template-columns: repeat(3, 75px);
     grid-gap: 10px;
+    -ms-grid-gap: 10px;
 }
-
 .device__board > div > div {
     width: 75px;
     height: 75px;
@@ -119,7 +108,7 @@ body {
     font-size: 4rem;
  }
 .icon {
-    font-family: 'Audiowide', cursive;
+    font-family: 'Audiowide', sans-serif;
     font-size: 3rem;
     padding: 14px 0 0 0;
 }
@@ -139,7 +128,6 @@ body {
     width: 93px;
     align-items: center;
     justify-content: center;
-    //font-size: 2rem;
 }
 .device__players--score > div {
      display: inline-block;
@@ -151,9 +139,6 @@ body {
      padding: 0px 0px 0px 0;
      font-size: 1.5rem;
  }
-
-
-
 
 /* Custom, iPhone Retina */
 @media only screen and (min-width : 20rem) {  /* 320 / 16 = 20rem */
@@ -167,41 +152,6 @@ body {
 
 /* Small Devices, Tablets */
 @media only screen and (min-width : 48rem) {  /* 768 / 16 =  48rem */
- /*   .device {
-        background:  no-repeat url('../img/tic-tac-toeSchets_greyDef.jpg');
-        background-position-x: center;
-        height: 830px;
-        font-size: 2rem;
-    }
-    .device__board > div {
-        grid-template-rows: repeat(3, 120px);
-        grid-template-columns: repeat(3, 120px);
-        grid-gap: 15px;
-    }
-    .device__players {
-        padding-top: 17px;
-    }
-    .device__players > div {
-
-}
-    .device__board > div > div {
-        width: 120px;
-        height: 120px;
-    }
-    .device__players--player {
-        width: 125px;
-    }
-    .device__players--score {
-        width: 185px;
-    }
-    .device__players--score > div  {
-        padding: 46px 16px 0px;
-        font-size: 3rem;
-    }
-    .icon {
-        font-size: 4rem;
-        padding: 3rem 0 0 0;
-}  */
 
 }
 

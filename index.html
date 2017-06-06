@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tic-tac-toe</title>
-  <link href='https://fonts.googleapis.com/css?family=Inconsolata:400,700' rel='stylesheet' type='text/css'>
-  <link href="https://fonts.googleapis.com/css?family=Audiowide|Electrolize|Iceland|Ropa+Sans|Share+Tech" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Audiowide|Share+Tech" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -16,18 +15,11 @@
     <div class="device">
         <div class="device__turn">
             <div  id="turn" >Tic-tac-toe </div>
-        </div> <!-- End device__message-->
+        </div> <!-- End device__turn-->
         <div class="device__reset">
             <div id="reset" class="button">RESET</div>
         </div> <!-- End device__reset-->
-        <div class="device__message">
-       <!--     <h3>Choose your opponent</h3>
-            <div id="playerChoice">
-                <div id="oppHuman" class="button">Another human</div>
-                <div id="oppComputer" class="button">Computer</div>
-            </div>  -->
-
-        </div>  <!-- End device__message-->
+        <div class="device__message"></div>  <!-- End device__message-->
         <div class="device__board">
             <div>
                 <div id="0" class="icon"></div>
@@ -43,27 +35,24 @@
         </div> <!-- End device__board-->
         <div class="device__players">
             <div>
-            <div class="device__players--player">
-                <div id="player1" class="player"></div>
-                <div id="icon1" class="icon"></div>
-            </div>
-            <div class="device__players--score">
-                <div>SCORE</div>
-                <div id="score1">0</div>
-                <div id="score2">0</div>
-            </div>
-            <div class="device__players--player">
-                <div id="player2" class="player"></div>
-                <div id="icon2" class="icon"></div>
-            </div>
-
+                <div class="device__players--player">
+                    <div id="player1" class="player"></div>
+                    <div id="icon1" class="icon"></div>
+                </div>
+                <div class="device__players--score">
+                    <div>SCORE</div>
+                    <div id="score1">0</div>
+                    <div id="score2">0</div>
+                </div>
+                <div class="device__players--player">
+                    <div id="player2" class="player"></div>
+                    <div id="icon2" class="icon"></div>
+                </div>
             </div>
         </div> <!-- End device__players-->
 
     </div> <!-- End device-->
 
-
-
-  <script src="js/main.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
