@@ -8,7 +8,7 @@ var game;
 function Board() {
   var self = this,
   matrix = [0,1,2,3,4,5,6,7,8],
-  getPosition = function(e) {  // click handler for board
+  getPosition = function(e) { 
       var cell = e.target,
       int = cell.id,
       icon,
@@ -20,7 +20,6 @@ function Board() {
      if (matrix[int] === "X" || matrix[int] === "O") { return; }
       else {
           matrix[int] = icon;
-          //self.counter++;
           document.getElementById(int).textContent = icon;
           self.playerOnePlays = self.playerOnePlays === true ? false : true;
       }
@@ -70,7 +69,6 @@ function Board() {
       document.getElementById(i).textContent = "";
   }
 
- // this.matrix = [];
   this.playerOnePlays = false;
   this.finished = false;
   this.getPosition = getPosition;
@@ -143,7 +141,8 @@ function Game() {
         self.board.playerOnePlays = (Math.ceil(Math.random()*10) % 2) === 0;
         self.nextTurn();
     },
-    disableClick = function() { //disable clicking when it's computer's turn
+    //disable clicking when it's computer's turn
+    disableClick = function() { 
         for (var i = 0; i < 9; i++) { listener("remove", "id", i, self.board.getPosition); }
     },
     enableClick = function() {
@@ -152,7 +151,6 @@ function Game() {
     emptyIndexes = function(state) {
       return state.filter(function(el) {
         return (el === parseInt(el, 10));
-        //return (el !== "O" && el !== "X");
       });
     };
 
@@ -161,8 +159,6 @@ function Game() {
     this.oneHuman = oneHuman;
     this.board = board;
     this.board.playerOnePlays = false;
-    //this.board.matrix = [];
-    //this.counter = counter;
     this.scores = scores;
     this.askUser = function(oneHuman) {
         var el = document.querySelectorAll(".device__message");
@@ -199,12 +195,7 @@ function Game() {
                       var state = game.board.getMatrix();
                        if (emptyIndexes(state).length === 9) {
                         self.playerTwo.makeAIMove("blind");
-                        console.log("everything is empty");
-                       } else {
-                    //      console.log("Number of empty positions: " + emptyIndexes(state).length);
-                        self.playerTwo.makeAIMove("beginner");                                    
-                  //self.playerTwo.makeAIMove();
-                      }
+                       } else { self.playerTwo.makeAIMove("smart"); }
                   } else {
                     el.textContent = "Player 2's turn!";
                     enableClick();
@@ -241,8 +232,6 @@ function Game() {
           var el = document.getElementById(i);
           if (el.hasAttribute("style")) { el.removeAttribute("style"); }
         }
-        //self.counter = 0;
-       // self.board.matrix.length = 0;
         // make random decision which player starts
         self.board.playerOnePlays = (Math.ceil(Math.random()*10) % 2) === 0;
         enableClick();
@@ -279,7 +268,7 @@ function AI(id, name, icon) {
     }, 400);
   },
 
-  takeBeginnerMove = function() {
+  takeSmartMove = function() {
     var humanPlayer = game.playerOne.getIcon(),
     aiPlayer = self.icon,
     //origBoard = game.board.getMatrix(),
@@ -290,128 +279,93 @@ function AI(id, name, icon) {
         //return (el !== "O" && el !== "X");
       });
     },
-    winningCombi = function(state, player) {
-    /*  if (
-   (state[0] == player && state[1] == player && state[2] == player) ||
-   (state[3] == player && state[4] == player && state[5] == player) ||
-   (state[6] == player && state[7] == player && state[8] == player) ||
-   (state[0] == player && state[3] == player && state[6] == player) ||
-   (state[1] == player && state[4] == player && state[7] == player) ||
-   (state[2] == player && state[5] == player && state[8] == player) ||
-   (state[0] == player && state[4] == player && state[8] == player) ||
-   (state[2] == player && state[4] == player && state[6] == player)
-   ) {
-   return true;
-   } else {
-   return false;
-   } */
-    var state = state,
-      player = player,
-      checkRows = function(state, player) {
-        for (var i = 0; i <= 6; i = i + 3) {
-          if (state[i] === player && state[i + 1] === state[i] && state[i + 2] === player) { return true; }
-        }
-      },
-      checkColumns = function(state, player) {
-        for (var i = 0; i <= 2; i++) {
-          if (state[i] === player && state[i + 3] === state[i] && state[i + 6] === player) { return true; }
-        }
-      },
-      checkDiagonals = function(state, player) {
-        for (var i = 0, j = 4; i <= 2; i = i+2, j = j - 2) {
-          if (state[i] === player && state[i + j] === state[i] && state[i + 2*j] === player) { return true; }
-        }
-      };
-      if (checkRows(state, player) || checkColumns(state, player) || checkDiagonals(state, player)) { return true;}
-      else { return false; }
+    winningCombi = function(state, player) {  
+      var state = state,
+        player = player,
+        checkRows = function(state, player) {
+          for (var i = 0; i <= 6; i = i + 3) {
+            if (state[i] === player && state[i + 1] === state[i] && state[i + 2] === player) { return true; }
+          }
+        },
+        checkColumns = function(state, player) {
+          for (var i = 0; i <= 2; i++) {
+            if (state[i] === player && state[i + 3] === state[i] && state[i + 6] === player) { return true; }
+          }
+        },
+        checkDiagonals = function(state, player) {
+          for (var i = 0, j = 4; i <= 2; i = i+2, j = j - 2) {
+            if (state[i] === player && state[i + j] === state[i] && state[i + 2*j] === player) { return true; }
+          }
+        };
+        if (checkRows(state, player) || checkColumns(state, player) || checkDiagonals(state, player)) { return true;}
+        else { return false; }
     },
 
     minMax = function(newState, player) {
-      //console.log("starting minMax: newState: " + newState + ", player: " + player)
       var availableSpots = emptyIndexes(newState);
       if (winningCombi(newState, humanPlayer)) { return {score:-10}; }
       else if (winningCombi(newState, aiPlayer)) { return {score:10}; }
       else if (availableSpots.length === 0 ) { return {score:0}; }
-    //},
-  //  collectScores = function(availableSpots, newState, player) {
-  //    else {
-        var moves = [];
-        for (var i = 0; i < availableSpots.length; i++) {
-          var move = {};
-          move.index = newState[availableSpots[i]];
-          newState[availableSpots[i]] = player; // set the available spot to current player
-
-          // collect the score resulting from calling minMax on the opponent of the current player
-          if (player === aiPlayer) {
-            var result = minMax(newState, humanPlayer);
-            move.score = result.score;
-          } else {
-            var result = minMax(newState, aiPlayer);
-            move.score = result.score;
-          }
-          // reset the spot to empty
-          newState[availableSpots[i]] = move.index;
-          //push the object to the array;
-          moves.push(move);
-        }
-        // if it is the computer's turn loop over the moves and choose the move with the highest score
-        var bestMove;
+  
+      var moves = [];
+      for (var i = 0; i < availableSpots.length; i++) {
+        var move = {};
+        move.index = newState[availableSpots[i]];
+        // set the available spot to current player
+        newState[availableSpots[i]] = player; 
+        // collect the score resulting from calling minMax on the opponent of the current player
         if (player === aiPlayer) {
-          var bestScore = -10000;
-          for (var i = 0; i < moves.length; i++) {
-            //  console.log("player is " + player + ", " + i + " returns a score of " + moves[i].score);
-            if (moves[i].score > bestScore) {
-              bestScore = moves[i].score;
-              bestMove = i;
-
-            }
-          }
-        } else {  // else loop over the moves and choose the move with the lowest score
-          var bestScore = 10000;
-          for (var i = 0; i < moves.length; i++) {
-            //console.log("player is " + player  + ", ");
-            //  console.log(i + " returns a score of " + moves[i].score);
-            if (moves[i].score < bestScore) {
-              bestScore = moves[i].score;
-              bestMove = i;
-
-            }
+          var result = minMax(newState, humanPlayer);
+          move.score = result.score;
+        } else {
+          var result = minMax(newState, aiPlayer);
+          move.score = result.score;
+        }
+        // reset the spot to empty
+        newState[availableSpots[i]] = move.index;
+        //push the object to the array;
+        moves.push(move);
+      }
+      // if it is the computer's turn loop over the moves and choose the move with the highest score
+      var bestMove;
+      if (player === aiPlayer) {
+        var bestScore = -10000;
+        for (var i = 0; i < moves.length; i++) {
+          if (moves[i].score > bestScore) {
+            bestScore = moves[i].score;
+            bestMove = i;
           }
         }
-    //  }
+      } else {  // else loop over the moves and choose the move with the lowest score
+        var bestScore = 10000;
+        for (var i = 0; i < moves.length; i++) {         
+          if (moves[i].score < bestScore) {
+            bestScore = moves[i].score;
+            bestMove = i;
+          }
+        }
+      }
       // return the chosen move from the moves array;
-    //  console.log("AI fills spot " + moves[bestMove]);
       return moves[bestMove];
     };
 
     var state = game.board.getMatrix();
     bestMove = minMax(state, aiPlayer).index;
-
-    //game.board.matrix[bestMove] = self.icon;
     game.board.setMatrix(bestMove, self.icon);
     document.getElementById(bestMove).textContent = self.icon;
     game.board.checkIfTerminated(self.icon);
     game.board.playerOnePlays = true;
     game.nextTurn();
-
   };
-
- /* takeMove = function() {
-    var filled = game.board.matrix.filter(function(el, index, arr) {
-        return el !== undefined;
-    });
-    alert("will have to think about this, my options are not: " + filled);
-  }; */
 
   this.id = id;
   this.name = name;
   this.icon = icon;
   this.board = game.board;
-  //this.matrix = game.matrix;
   this.makeAIMove = function(level) {
     switch(level) {
       case "blind": takeBlindMove(); break;
-      case "beginner": takeBeginnerMove(); break;
+      case "smart": takeSmartMove(); break;
       default: takeMove(); break;
     }
   };
