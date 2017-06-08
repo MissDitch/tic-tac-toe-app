@@ -7,15 +7,19 @@ var game;
 
 function Board() {
   var self = this,
+  matrix = [0,1,2,3,4,5,6,7,8],
   getPosition = function(e) {  // click handler for board
-      var int, icon, cell = e.target;
-      int = cell.id;
+      var cell = e.target,
+      int = cell.id,
+      icon,
+      matrix = self.getMatrix();
+
       if (self.playerOnePlays ) { icon = game.playerOne.getIcon(); }
       else { icon =  game.playerTwo.getIcon(); }
 
-      if (self.matrix[int] !== undefined) { return; }
+     if (matrix[int] === "X" || matrix[int] === "O") { return; }
       else {
-          self.matrix[int] = icon;
+          matrix[int] = icon;
           //self.counter++;
           document.getElementById(int).textContent = icon;
           self.playerOnePlays = self.playerOnePlays === true ? false : true;
@@ -23,33 +27,34 @@ function Board() {
       self.checkIfTerminated(icon);
   },
   checkIfTerminated = function(icon) {
-      var timeOutID;
+      var timeOutID,
+      matrix = self.getMatrix();
       //check rows
       for (var i = 0; i <= 6; i = i + 3) {
-        if (self.matrix[i] === icon && self.matrix[i + 1] === self.matrix[i] && self.matrix[i + 2] === icon) {
+        if (matrix[i] === icon && matrix[i + 1] === matrix[i] && matrix[i + 2] === icon) {
           game.showWinner(icon, i, i+1, i+2);
           return;
         }
       }
       // check columns
       for (var i = 0; i <= 2; i++) {
-        if (self.matrix[i] === icon && self.matrix[i + 3] === self.matrix[i] && self.matrix[i + 6] === icon) {
+        if (matrix[i] === icon && matrix[i + 3] === matrix[i] && matrix[i + 6] === icon) {
           game.showWinner(icon, i, i+3, i+6);
           return;
         }
       }
       //check diagonals
       for (var i = 0, j = 4; i <= 2; i = i+2, j = j - 2) {
-        if (self.matrix[i] === icon && self.matrix[i + j] === self.matrix[i] && self.matrix[i + 2*j] === icon) {
+        if (matrix[i] === icon && matrix[i + j] === matrix[i] && matrix[i + 2*j] === icon) {
           game.showWinner(icon, i, i+j, i+2*j);
           return;
         }
       }
 
-      filled = self.matrix.filter(function(el, index, arr) {
-          return el !== undefined;
+       var empty = matrix.filter(function(el, index, arr) {
+          return (el === parseInt(el, 10));
       });
-      if (filled.length === 9) {
+      if (empty.length === 0) {
           this.finished = true;
           document.getElementById("turn").textContent = "It's a tie!";
           timeOutID = setTimeout(function() {
@@ -65,11 +70,17 @@ function Board() {
       document.getElementById(i).textContent = "";
   }
 
-  this.matrix = [];
+ // this.matrix = [];
   this.playerOnePlays = false;
   this.finished = false;
   this.getPosition = getPosition;
   this.checkIfTerminated = checkIfTerminated;
+  this.getMatrix = function() {
+    return matrix;
+  }
+  this.setMatrix = function(index, icon) {
+    matrix[index] = icon;
+  }
 }
 
 function Game() {
@@ -144,7 +155,7 @@ function Game() {
     this.oneHuman = oneHuman;
     this.board = board;
     this.board.playerOnePlays = false;
-    this.board.matrix = [];
+    //this.board.matrix = [];
     //this.counter = counter;
     this.scores = scores;
     this.askUser = function(oneHuman) {
@@ -179,8 +190,15 @@ function Game() {
                   if (self.oneHuman) {
                       el.textContent = "Computer's turn!";
                       disableClick();
-                      self.playerTwo.makeAIMove("blind");
-                      //self.playerTwo.makeAIMove();
+                      var state = game.board.getMatrix();
+                     //   if (emptyIndexes(state).length === 9) {
+                        self.playerTwo.makeAIMove("blind");
+                        console.log("everything is empty");
+                    //    } else {
+                    //      console.log("Number of empty positions: " + emptyIndexes(state).length);
+                       // self.playerTwo.makeAIMove("beginner");                                    
+                  //self.playerTwo.makeAIMove();
+                    //  }
                   } else {
                     el.textContent = "Player 2's turn!";
                     enableClick();
@@ -218,7 +236,7 @@ function Game() {
           if (el.hasAttribute("style")) { el.removeAttribute("style"); }
         }
         //self.counter = 0;
-        self.board.matrix.length = 0;
+       // self.board.matrix.length = 0;
         // make random decision which player starts
         self.board.playerOnePlays = (Math.ceil(Math.random()*10) % 2) === 0;
         enableClick();
@@ -241,8 +259,9 @@ function AI(id, name, icon) {
   takeBlindMove = function() {
     setTimeout(function() {
       pos = Math.ceil(Math.random()* 9 - 1);
-      if (game.board.matrix[pos] === undefined) {
-        game.board.matrix[pos] = self.icon;
+      var matrix = game.board.getMatrix();
+      if (matrix[pos] === parseInt(matrix[pos], 10)) {
+        matrix[pos] = self.icon;
         document.getElementById(pos).textContent = self.icon;
         game.board.checkIfTerminated(self.icon);
         game.board.playerOnePlays = true;
