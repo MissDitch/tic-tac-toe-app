@@ -12,33 +12,27 @@ function Board() {
       var cell = e.target,
       int = cell.id,
       icon,
-      matrix = self.getMatrix;
+      matrix = self.getMatrix();
 
       if (self.playerOnePlays ) { icon = game.playerOne.getIcon(); }
       else { icon =  game.playerTwo.getIcon(); }
 
-    //  if (matrix[int] !== parseInt(matrix[int], 10)) { return;}
-          if (matrix[int] === "X" || matrix[int] === "O") { return; }
+     if (matrix[int] === "X" || matrix[int] === "O") { return; }
       else {
-          self.setMatrix(int, icon);
-          console.log("player 1 chose " + int);
+          matrix[int] = icon;
           //self.counter++;
           document.getElementById(int).textContent = icon;
           self.playerOnePlays = self.playerOnePlays === true ? false : true;
       }
-      //self.checkIfTerminated(icon);
       self.checkIfTerminated(icon);
   },
   checkIfTerminated = function(icon) {
-  //  console.log(self.matrix);
-    var matrix = self.getMatrix();
-    console.log("self.getMatrix(): " + self.getMatrix());
-      var timeOutID;
+      var timeOutID,
+      matrix = self.getMatrix();
       //check rows
       for (var i = 0; i <= 6; i = i + 3) {
         if (matrix[i] === icon && matrix[i + 1] === matrix[i] && matrix[i + 2] === icon) {
           game.showWinner(icon, i, i+1, i+2);
-          console.log("Board.checkIfTerminated: winning positions: " + i + ", " + (i+1) + ", " + (i+2));
           return;
         }
       }
@@ -46,7 +40,6 @@ function Board() {
       for (var i = 0; i <= 2; i++) {
         if (matrix[i] === icon && matrix[i + 3] === matrix[i] && matrix[i + 6] === icon) {
           game.showWinner(icon, i, i+3, i+6);
-          console.log("Board.checkIfTerminated: winning positions: " + i + ", " + (i+3) + ", " + (i+6));
           return;
         }
       }
@@ -54,25 +47,21 @@ function Board() {
       for (var i = 0, j = 4; i <= 2; i = i+2, j = j - 2) {
         if (matrix[i] === icon && matrix[i + j] === matrix[i] && matrix[i + 2*j] === icon) {
           game.showWinner(icon, i, i+j, i+2*j);
-          console.log("Board.checkIfTerminated: winning positions: " + i + ", " + (i+j) + ", " + (i+2*j));
           return;
         }
       }
 
-      var empty = matrix.filter(function(el, index, arr) {
+       var empty = matrix.filter(function(el, index, arr) {
           return (el === parseInt(el, 10));
       });
       if (empty.length === 0) {
-          //this.finished = true;
-          //game.setState("finished");
-          console.log("it's a tie!");
+          this.finished = true;
           document.getElementById("turn").textContent = "It's a tie!";
-          //self.resetMatrix();
           timeOutID = setTimeout(function() {
               game.newGame();
           }, 2000);
       }
-      else if (empty.length > 0){
+      else {
         game.nextTurn();
       }
   };
@@ -81,9 +70,9 @@ function Board() {
       document.getElementById(i).textContent = "";
   }
 
-  //this.matrix = [0,1,2,3,4,5,6,7,8];
+ // this.matrix = [];
   this.playerOnePlays = false;
-  //this.finished = false;
+  this.finished = false;
   this.getPosition = getPosition;
   this.checkIfTerminated = checkIfTerminated;
   this.getMatrix = function() {
@@ -91,9 +80,6 @@ function Board() {
   }
   this.setMatrix = function(index, icon) {
     matrix[index] = icon;
-  }
-  this.resetMatrix = function() {
-    matrix.length = 0;
   }
 }
 
@@ -175,16 +161,9 @@ function Game() {
     this.oneHuman = oneHuman;
     this.board = board;
     this.board.playerOnePlays = false;
-    //this.state = "running";
-    //this.board.matrix = [0,1,2,3,4,5,6,7,8];
+    //this.board.matrix = [];
     //this.counter = counter;
     this.scores = scores;
-    //this.getState = function() {
-    //  return this.state;
-  //  }
-  //  this.setState = function(string) {
-    //  this.state = string;
-  //  }
     this.askUser = function(oneHuman) {
         var el = document.querySelectorAll(".device__message");
         el[0].style.display = "block";
@@ -206,10 +185,10 @@ function Game() {
         }
     };
     this.nextTurn = function() {
-  //    if (game.getState() === "running") {
+      if (!self.board.finished) {
         var int, el  = document.getElementById("turn");
         el.textContent = "";
-          //setTimeout(function() {
+          setTimeout(function() {
               if (self.board.playerOnePlays) {
                   self.oneHuman ? el.textContent = "Your turn!" : el.textContent = "Player 1's turn!";
                   enableClick();
@@ -218,22 +197,22 @@ function Game() {
                       el.textContent = "Computer's turn!";
                       disableClick();
                       var state = game.board.getMatrix();
-                      if (emptyIndexes(state).length === 9) {
-                       self.playerTwo.makeAIMove("blind");
-                       console.log("everything is empty");
-                      } else {
-                        console.log("Number of empty positions: " + emptyIndexes(state).length);
-                      self.playerTwo.makeAIMove("beginner");
-                      //self.playerTwo.makeAIMove();
-                     }
+                       if (emptyIndexes(state).length === 9) {
+                        self.playerTwo.makeAIMove("blind");
+                        console.log("everything is empty");
+                       } else {
+                    //      console.log("Number of empty positions: " + emptyIndexes(state).length);
+                        self.playerTwo.makeAIMove("beginner");                                    
+                  //self.playerTwo.makeAIMove();
+                      }
                   } else {
                     el.textContent = "Player 2's turn!";
                     enableClick();
                   }
               }
               el.style.color =  "rgba(255, 165, 0, 0.9)";
-      //  }, 800);
-    //  } else return;
+        }, 800);
+      } else return;
     };
     this.showWinner = function(icon, pos1, pos2, pos3) {
         var winner;
@@ -250,26 +229,20 @@ function Game() {
         self.scores[winner.id]++;
         document.getElementById("score" + (winner.id + 1)).textContent = self.scores[winner.id];
         disableClick();
-        self.board.resetMatrix();
-        //game.setState("finished");
-        //self.board.finished = true;
-        //console.log('game.setState("finished")');
-        //console.log("self.board.matrix.length = " + self.board.matrix.length);
+        self.board.finished = true;
         setTimeout(function() {
           self.newGame();
         }, 2000);
     };
     this.newGame = function() {
-      //game.setState("running");
         self.board = new Board();
-        console.log("matrix at newGame contains: " + self.board.getMatrix());
         document.getElementById("turn").textContent = "";
         for (var i = 0; i < 9; i++) {
           var el = document.getElementById(i);
           if (el.hasAttribute("style")) { el.removeAttribute("style"); }
         }
         //self.counter = 0;
-        //self.board.matrix.length = 0;
+       // self.board.matrix.length = 0;
         // make random decision which player starts
         self.board.playerOnePlays = (Math.ceil(Math.random()*10) % 2) === 0;
         enableClick();
@@ -292,13 +265,12 @@ function AI(id, name, icon) {
   originalState,
   humanPlayer,
   aiPlayer,
-  takeBlindMove = function() {  //  random moves
+  takeBlindMove = function() {
     setTimeout(function() {
       pos = Math.ceil(Math.random()* 9 - 1);
       var matrix = game.board.getMatrix();
       if (matrix[pos] === parseInt(matrix[pos], 10)) {
-      //if (matrix[pos] !== "O" && matrix[pos] !== "X" ) {
-        game.board.setMatrix(pos, self.icon);
+        matrix[pos] = self.icon;
         document.getElementById(pos).textContent = self.icon;
         game.board.checkIfTerminated(self.icon);
         game.board.playerOnePlays = true;
@@ -306,8 +278,6 @@ function AI(id, name, icon) {
       } else { takeBlindMove(); }
     }, 400);
   },
-
-
 
   takeBeginnerMove = function() {
     var humanPlayer = game.playerOne.getIcon(),
@@ -424,22 +394,20 @@ function AI(id, name, icon) {
     game.board.playerOnePlays = true;
     game.nextTurn();
 
+  };
 
-  },
-  takeMove = function() {
-    var empty = game.board.getMatrix().filter(function(el, index, arr) {
-      return (el === parseInt(el, 10));
-        //return (el !== "O" && el !== "X");
+ /* takeMove = function() {
+    var filled = game.board.matrix.filter(function(el, index, arr) {
+        return el !== undefined;
     });
-    //alert("will have to think about this, my options are not: " + empty);
-  }
-  ;
+    alert("will have to think about this, my options are not: " + filled);
+  }; */
 
   this.id = id;
   this.name = name;
   this.icon = icon;
   this.board = game.board;
-  //this.matrix = game.board.matrix;
+  //this.matrix = game.matrix;
   this.makeAIMove = function(level) {
     switch(level) {
       case "blind": takeBlindMove(); break;
