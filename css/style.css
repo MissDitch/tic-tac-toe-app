@@ -13,6 +13,10 @@ body {
     background: #ffffff; /*  */
     color: #ffffff;
 }
+a {
+    text-decoration: none;
+    color: orange;
+}
 .container {
     padding-top: 1.5rem;
     width: 100%;
@@ -24,7 +28,7 @@ body {
     outline: none;
 }
 .button:hover {
-    color: red;
+    color: orange;
 }
 .device {
     margin: 0 auto;
