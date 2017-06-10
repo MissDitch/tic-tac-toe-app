@@ -184,21 +184,23 @@ function Game() {
         var int, el  = document.getElementById("turn");
         el.textContent = "";
           setTimeout(function() {
-              if (self.board.playerOnePlays) {
-                  self.oneHuman ? el.textContent = "Your turn!" : el.textContent = "Player 1's turn!";
-                  enableClick();
-              } else {
-                  if (self.oneHuman) {
-                      el.textContent = "Computer's turn!";
-                      disableClick();
-                      var state = game.board.getMatrix();
-                       if (emptyIndexes(state).length === 9) {
-                        self.playerTwo.makeAIMove("blind");
-                       } else { self.playerTwo.makeAIMove("smart"); }
-                  } else {
+            if (self.board.playerOnePlays) {
+                self.oneHuman ? el.textContent = "Your turn!" : el.textContent = "Player 1's turn!";
+                enableClick();
+            } else {
+                if (self.oneHuman) {
+                    el.textContent = "Computer's turn!";
+                    disableClick();
+                    var state = game.board.getMatrix();
+                    if (emptyIndexes(state).length === 9) {
+                        self.playerTwo.makeAIMove("firstMove");
+                    } else if (emptyIndexes(state).length === 8) {
+                        self.playerTwo.makeAIMove("secondMove");
+                    } else { self.playerTwo.makeAIMove("nextMove"); }
+                } else {
                     el.textContent = "Player 2's turn!";
                     enableClick();
-                  }
+                }
               }
               el.style.color =  "rgba(255, 165, 0, 0.9)";
         }, 800);
@@ -248,125 +250,162 @@ function Player(id, name, icon) {
 }
 
 function AI(id, name, icon) {
-  var self = this,
-  pos,
-  originalState,
-  humanPlayer,
-  aiPlayer,
-  takeBlindMove = function() {
-      setTimeout(function() {
-          pos = Math.ceil(Math.random()* 9 - 1);
-          var matrix = game.board.getMatrix();
-          if (matrix[pos] === parseInt(matrix[pos], 10)) {
-              matrix[pos] = self.icon;
-              document.getElementById(pos).textContent = self.icon;
-              game.board.checkIfTerminated(self.icon);
-              game.board.playerOnePlays = true;
-              game.nextTurn();
-          } else { takeBlindMove(); }
-      }, 400);
-  },
-  takeSmartMove = function() {
-      var humanPlayer = game.playerOne.getIcon(),
-      aiPlayer = self.icon,
-
-      emptyIndexes = function(state) {
-          return state.filter(function(el) {
-              return (el === parseInt(el, 10));
-          });
-      },
-      winningCombi = function(state, player) {  
-          var state = state,
-          player = player,
-          checkRows = function(state, player) {
-              for (var i = 0; i <= 6; i = i + 3) {
-                  if (state[i] === player && state[i + 1] === state[i] && state[i + 2] === player) { return true; }
-              }
-          },
-          checkColumns = function(state, player) {
-              for (var i = 0; i <= 2; i++) {
-                  if (state[i] === player && state[i + 3] === state[i] && state[i + 6] === player) { return true; }
-              }
-          },
-          checkDiagonals = function(state, player) {
-              for (var i = 0, j = 4; i <= 2; i = i+2, j = j - 2) {
-                  if (state[i] === player && state[i + j] === state[i] && state[i + 2*j] === player) { return true; }
-              }
-          };
-          if (checkRows(state, player) || checkColumns(state, player) || checkDiagonals(state, player)) { return true;}
-          else { return false; }
-      },
-
-      minMax = function(newState, player) {
-          var availableSpots = emptyIndexes(newState);
-          if (winningCombi(newState, humanPlayer)) { return {score:-10}; }
-          else if (winningCombi(newState, aiPlayer)) { return {score:10}; }
-          else if (availableSpots.length === 0 ) { return {score:0}; }
-      
-          var moves = [];
-          for (var i = 0; i < availableSpots.length; i++) {
-              var move = {};
-              move.index = newState[availableSpots[i]];
-              // set the available spot to current player
-              newState[availableSpots[i]] = player; 
-              // collect the score resulting from calling minMax on the opponent of the current player
-              if (player === aiPlayer) {
-                  var result = minMax(newState, humanPlayer);
-                  move.score = result.score;
-              } else {
-                  var result = minMax(newState, aiPlayer);
-                  move.score = result.score;
-              }
-              // reset the spot to empty
-              newState[availableSpots[i]] = move.index;
-              //push the object to the array;
-              moves.push(move);
-          }
-          // if it is the computer's turn loop over the moves and choose the move with the highest score
-          var bestMove;
-          if (player === aiPlayer) {
-              var bestScore = -10000;
-              for (var i = 0; i < moves.length; i++) {
-                  if (moves[i].score > bestScore) {
+    var self = this,
+    pos,
+    originalState,
+    humanPlayer,
+    aiPlayer,
+    emptyIndexes = function(state) {
+        return state.filter(function(el) {
+            return (el === parseInt(el, 10));
+        });
+    },
+    winningCombi = function(state, player) {  
+        var state = state,
+        player = player,
+        checkRows = function(state, player) {
+            for (var i = 0; i <= 6; i = i + 3) {
+                if (state[i] === player && state[i + 1] === state[i] && state[i + 2] === player) { return true; }
+            }
+        },
+        checkColumns = function(state, player) {
+            for (var i = 0; i <= 2; i++) {
+                if (state[i] === player && state[i + 3] === state[i] && state[i + 6] === player) { return true; }
+            }
+        },
+        checkDiagonals = function(state, player) {
+            for (var i = 0, j = 4; i <= 2; i = i+2, j = j - 2) {
+                if (state[i] === player && state[i + j] === state[i] && state[i + 2*j] === player) { return true; }
+            }
+        };
+        if (checkRows(state, player) || checkColumns(state, player) || checkDiagonals(state, player)) { return true;}
+        else { return false; }
+    },
+    minMax = function(newState, depth, player) { 
+        var availableSpots = emptyIndexes(newState);
+        /* Score is influenced by the number of moves (depth) that are needed to win
+        the less moves, the better */
+        if (winningCombi(newState, humanPlayer)) { return {score:-10 + depth}; }
+        else if (winningCombi(newState, aiPlayer)) { return {score:10 - depth}; }
+        else if (availableSpots.length === 0 ) { return {score:0}; }
+    
+        var moves = [];
+        for (var i = 0; i < availableSpots.length; i++) {
+            var move = {};
+            move.index = newState[availableSpots[i]];
+            // set the available spot to current player
+            newState[availableSpots[i]] = player; 
+            // collect the score resulting from calling minMax on the opponent of the current player
+            if (player === aiPlayer) {
+                var result = minMax(newState, depth + 1, humanPlayer);
+                move.score = result.score;
+            } else {
+                var result = minMax(newState, depth + 1, aiPlayer);
+                move.score = result.score;
+            }
+            // reset the spot to empty
+            newState[availableSpots[i]] = move.index;
+            //push the object to the array;
+            moves.push(move);
+        }
+        // if it is the computer's turn loop over the moves and choose the move with the highest score
+        var bestMove;
+        if (player === aiPlayer) {
+            var bestScore = -10000;
+            for (var i = 0; i < moves.length; i++) {
+                if (moves[i].score > bestScore) {
+                bestScore = moves[i].score;
+                bestMove = i;
+                }
+            }
+        } else {  // else loop over the moves and choose the move with the lowest score
+            var bestScore = 10000;
+            for (var i = 0; i < moves.length; i++) {         
+                if (moves[i].score < bestScore) {
                     bestScore = moves[i].score;
                     bestMove = i;
-                  }
-              }
-          } else {  // else loop over the moves and choose the move with the lowest score
-              var bestScore = 10000;
-              for (var i = 0; i < moves.length; i++) {         
-                  if (moves[i].score < bestScore) {
-                      bestScore = moves[i].score;
-                      bestMove = i;
-                  }
-              }
-          }
-          // return the chosen move from the moves array;
-      return moves[bestMove];
-      };
+                }
+            }
+        }
+        // return the chosen move from the moves array;
+        //console.log(moves);
+        return moves[bestMove];
+    },
+    takeBlindMove = function() {
+        setTimeout(function() {
+            pos = Math.ceil(Math.random()* 9 - 1);
+            var matrix = game.board.getMatrix();
+            if (matrix[pos] === parseInt(matrix[pos], 10)) {
+                matrix[pos] = self.icon;
+                document.getElementById(pos).textContent = self.icon;
+                game.board.checkIfTerminated(self.icon);
+                game.board.playerOnePlays = true;
+                game.nextTurn();
+            } else { takeBlindMove(); }
+        }, 400);
+    },
+    /*takeBeginnerMove = function() {
+        var humanPlayer = game.playerOne.getIcon(),
+        aiPlayer = self.icon,
+        state = game.board.getMatrix(),
+        bestMove = minMax(state, 0, aiPlayer).index;
 
-      var state = game.board.getMatrix();
-      var bestMove = minMax(state, aiPlayer).index;
-      game.board.setMatrix(bestMove, self.icon);
-      document.getElementById(bestMove).textContent = self.icon;
-      game.board.checkIfTerminated(self.icon);
-      game.board.playerOnePlays = true;
-      game.nextTurn();
-  };
+        game.board.setMatrix(bestMove, self.icon);
+        document.getElementById(bestMove).textContent = self.icon;
+        game.board.checkIfTerminated(self.icon);
+        game.board.playerOnePlays = true;
+        game.nextTurn();
+    }, */
+    takeFirstMove = function() {
+        var matrix = game.board.getMatrix();
+        matrix[4] = self.icon;
+        document.getElementById(4).textContent = self.icon;
+        game.board.playerOnePlays = true;
+        game.nextTurn();        
+    }, 
+    takeSecondMove = function() {
+        var matrix = game.board.getMatrix();
+        if (matrix[4] === parseInt(matrix[4], 10)) { 
+            matrix[4] = self.icon;
+            document.getElementById(4).textContent = self.icon;
+        } else { // humanplayer has taken center, choose one of the corner squares
+            var corners = [0, 2, 6, 8],
+            index = Math.floor(Math.random() * 4);
+            corners[index] = self.icon;
+            document.getElementById(index).textContent = self.icon;
+        }
+        game.board.checkIfTerminated(self.icon);
+        game.board.playerOnePlays = true;
+        game.nextTurn(); 
+    }, 
+    takeNextMove = function() {
+        var humanPlayer = game.playerOne.getIcon(),
+        aiPlayer = self.icon,
+        state = game.board.getMatrix(),
+        bestMove = minMax(state, 0, aiPlayer).index;
 
-  this.id = id;
-  this.name = name;
-  this.icon = icon;
-  this.board = game.board;
-  this.makeAIMove = function(level) {
-    switch(level) {
-      case "blind": takeBlindMove(); break;
-      case "smart": takeSmartMove(); break;
+        game.board.setMatrix(bestMove, self.icon);
+        document.getElementById(bestMove).textContent = self.icon;
+        game.board.checkIfTerminated(self.icon);
+        game.board.playerOnePlays = true;
+        game.nextTurn();
     }
-  };
-  this.getIcon = function() {
-    return this.icon;
-  };
+
+    this.id = id;
+    this.name = name;
+    this.icon = icon;
+    this.board = game.board;
+    this.makeAIMove = function(level) {
+        switch(level) {
+        case "blind": takeBlindMove(); break;
+        case "firstMove": takeFirstMove(); break;
+        case "secondMove": takeSecondMove(); break;
+        case "nextMove": takeNextMove(); break;
+        }
+    };
+    this.getIcon = function() {
+        return this.icon;
+    };
 }
 
 function listener(addOrRemove, prop, selector, func) {
