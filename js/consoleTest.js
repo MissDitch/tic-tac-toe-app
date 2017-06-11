@@ -170,3 +170,146 @@ emptyIndexes(board);
 
 //var board = ['O',1 ,'X','X',4 ,'X', 6 ,'O','O'];
 //winningCombi(board, "O");
+
+
+
+function winningCombi(state, player) {  
+        var state = state,
+        icon = player.icon,
+        checkRows = function(state, icon) {
+            for (var i = 0; i <= 6; i = i + 3) {
+                if (state[i] === icon && state[i + 1] === state[i] && state[i + 2] === state[i]) { return true; }
+            }
+        },
+        checkColumns = function(state, icon) {
+            for (var i = 0; i <= 2; i++) {
+                if (state[i] === icon && state[i + 3] === state[i] && state[i + 6] === state[i]) { return true; }
+            }
+        },
+        checkDiagonals = function(state, icon) {
+            for (var i = 0, j = 4; i <= 2; i = i+2, j = j - 2) {
+                if (state[i] === icon && state[i + j] === state[i] && state[i + 2*j] === state[i]) { return true; }
+            }
+        };
+        if (checkRows(state, icon) || checkColumns(state, icon) || checkDiagonals(state, icon)) { return true;}
+        else { return false; }
+    }
+
+function minMax(newState, depth, player) { 
+        var availableSpots = emptyIndexes(newState);
+     //   console.log("available spots: ");
+     //   console.log(availableSpots);
+        
+        /* Score is influenced by the number of moves (depth) that are needed to win
+        the less moves, the better */
+        if (player.name === "Player 1" && winningCombi(newState, player)) { return {score:(-10 + depth)}; }
+        else if (player.name === "Computer"  && winningCombi(newState, player)) { return {score:(10 - depth)}; }
+        else if (availableSpots.length === 0 ) { return {score:0}; }
+        else {
+        depth++;
+        var moves = [];
+        for (var i = 0; i < availableSpots.length; i++) {
+            var move = {};
+            move.index = availableSpots[i];
+            // set the available spot to current player
+            newState[availableSpots[i]] = player.icon; 
+          //  console.log("depth and newState: ");
+          //  console.log(depth );
+           // console.log(newState);
+           
+            // collect the score resulting from calling minMax on the opponent of the current player
+            if (player.name === "Computer") {
+                var result = minMax(newState, depth, game.playerOne);
+             //   console.log("result human: ")
+               // console.log(result);
+                move.score = result.score;
+           //     console.log(move.score);
+            } else {
+                var result = minMax(newState, depth, game.playerTwo);
+           //     console.log("result computer: ")
+                //console.log(result);
+                move.score = result.score;
+             //    console.log(move.score);
+            }
+            // reset the spot to empty
+            newState[availableSpots[i]] = move.index;
+            //push the object to the array;
+            moves.push(move);
+        }
+        // if it is the computer's turn loop over the moves and choose the move with the highest score
+        var bestMove;
+        if (player.name === "Computer") {
+            var bestScore = -10000;
+            console.log("computers turn: ")
+            console.log(moves);
+            for (var i = 0; i < moves.length; i++) {
+                if (moves[i].score > bestScore) {
+                bestScore = moves[i].score;
+                bestMove = i;
+                }
+            }
+        } else {  // else loop over the moves and choose the move with the lowest score
+            var bestScore = 10000;
+             console.log("humans turn: ")
+            console.log(moves);
+            for (var i = 0; i < moves.length; i++) {         
+                if (moves[i].score < bestScore) {
+                    bestScore = moves[i].score;
+                    bestMove = i;
+                }
+            }
+        }
+        // return the chosen move from the moves array;
+        console.log ("best move: ");
+        console.log (moves[bestMove]);
+        return moves[bestMove];
+        }
+}
+
+var board = ['O','X','O','X','X','O', 6 ,7,'X'];
+//var player = {id: 1, name: "Computer", icon: "O"};
+var player = {id: 0, name: "Player 1", icon: "X"};
+
+var depth = 0;
+minMax(board, depth, player);
+
+
+
+computers turn: 
+[Object]0: Objectindex: 7score: 0__proto__: Objectlength: 1__proto__: Array(0)
+best move: 
+Object {index: 7, score: 0}index: 7score: 0__proto__: Object
+computers turn: 
+[Object]0: Objectlength: 1__proto__: Array(0)
+best move: 
+Object {index: 6, score: -8}index: 6score: -8__proto__: Object
+humans turn: 
+(2) [Object, Object]0: Objectindex: 6score: 0__proto__: Object1: Objectindex: 7score: -8__proto__: Objectlength: 2__proto__: Array(0)
+best move: 
+Object {index: 7, score: -8}index: 7score: -8__proto__: Object
+
+Object {index: 7, score: -8}
+
+
+
+var board = ['O','X','O','X','X','O', 6 ,7,'X'];
+var player = {id: 1, name: "Computer", icon: "O"};
+//var player = {id: 0, name: "Player 1", icon: "X"};
+
+var depth = 0;
+minMax(board, depth, player);
+
+humans turn: 
+[Object]0: Objectindex: 7score: 0__proto__: Objectlength: 1__proto__: Array(0)
+best move: 
+Object {index: 7, score: 0}index: 7score: 0__proto__: Object
+humans turn: 
+[Object]0: Objectlength: 1__proto__: Array(0)
+best move: 
+Object {index: 6, score: 0}index: 6score: 0__proto__: Object
+computers turn: 
+(2) [Object, Object]0: Object1: Objectlength: 2__proto__: Array(0)
+best move: 
+Object {index: 6, score: 0}index: 6score: 0__proto__: Object
+
+Object {index: 6, score: 0}index: 6score: 0__proto__: Object
