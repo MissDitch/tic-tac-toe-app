@@ -254,9 +254,7 @@ function Player(id, name, icon) {
 function AI(id, name, icon) {
     var self = this,
     pos,
-    originalState,
-    //humanPlayer,
-    //aiPlayer,
+    originalState, 
     
     winningCombi = function(state, player) {  
         var state = state,
@@ -280,9 +278,7 @@ function AI(id, name, icon) {
         else { return false; }
     },
     minMax = function(newState, depth, player) { 
-        var availableSpots = emptyIndexes(newState);
-     //   console.log("available spots: ");
-     //   console.log(availableSpots);
+        var availableSpots = emptyIndexes(newState);  
         
         /* Score is influenced by the number of moves (depth) that are needed to win
         the less moves, the better */
@@ -297,38 +293,27 @@ function AI(id, name, icon) {
             move.index = availableSpots[i];
             // set the available spot to current player
             newState[availableSpots[i]] = player.icon; 
-          //  console.log("depth and newState: ");
-          //  console.log(depth );
-           // console.log(newState);
-           
+         
             // collect the score resulting from calling minMax on the opponent of the current player
             if (player.name === "Computer") {
                 var result = minMax(newState, depth, game.playerOne);
-             //   console.log("result human: ")
-               // console.log(result);
                 move.score = result.score;
-           //     console.log(move.score);
             } else {
                 var result = minMax(newState, depth, game.playerTwo);
-           //     console.log("result computer: ")
-                //console.log(result);
                 move.score = result.score;
-             //    console.log(move.score);
             }
             // reset the spot to empty
             newState[availableSpots[i]] = move.index;
             //push the object to the array;
             var date = new Date();
-            console.log( player.name + "(with " + availableSpots.length + "available spots), move pushed to moves array at depth: " + depth + " and time: "+ date.getMilliseconds() );
+        //    console.log( player.name + "(with " + availableSpots.length + "available spots), move pushed to moves array at depth: " + depth + " and time: "+ date.getMilliseconds() );
             moves.push(move);
-            console.log(moves);
+       //     console.log(moves);
         }
         // if it is the computer's turn loop over the moves and choose the move with the highest score
         var bestMove;
         if (player.name === "Computer") {
             var bestScore = -10000;
-            console.log("computers turn: ")
-            console.log(moves);
             for (var i = 0; i < moves.length; i++) {
                 if (moves[i].score > bestScore) {
                 bestScore = moves[i].score;
@@ -336,9 +321,7 @@ function AI(id, name, icon) {
                 }
             }
         } else {  // else loop over the moves and choose the move with the lowest score
-            var bestScore = 10000;
-             console.log("humans turn: ")
-            console.log(moves);
+            var bestScore = 10000;    
             for (var i = 0; i < moves.length; i++) {         
                 if (moves[i].score < bestScore) {
                     bestScore = moves[i].score;
@@ -346,9 +329,7 @@ function AI(id, name, icon) {
                 }
             }
         }
-        // return the chosen move from the moves array;
-        console.log ("best move: ");
-        console.log (moves[bestMove]);
+        // return the chosen move from the moves array;  
         return moves[bestMove];
        // }
     },
@@ -365,20 +346,8 @@ function AI(id, name, icon) {
             } else { takeBlindMove(); }
         }, 400);
     },
-    /*takeBeginnerMove = function() {
-        var humanPlayer = game.playerOne.getIcon(),
-        aiPlayer = self.icon,
-        state = game.board.getMatrix(),
-        bestMove = minMax(state, 0, aiPlayer).index;
-
-        game.board.setMatrix(bestMove, self.icon);
-        document.getElementById(bestMove).textContent = self.icon;
-        game.board.checkIfTerminated(self.icon);
-        game.board.playerOnePlays = true;
-        game.nextTurn();
-    }, */
+  
     takeFirstMove = function() {
-       //  console.log("computer taking first move");
         var matrix = game.board.getMatrix();
         matrix[4] = self.icon;
         document.getElementById(4).textContent = self.icon;
@@ -386,7 +355,6 @@ function AI(id, name, icon) {
         game.nextTurn();        
     }, 
     takeSecondMove = function() {
-        // console.log("computer taking second move");
         var matrix = game.board.getMatrix();
         if (matrix[4] === parseInt(matrix[4], 10)) { 
             matrix[4] = self.icon;
@@ -406,8 +374,7 @@ function AI(id, name, icon) {
         var aiPlayer = game.playerTwo;
         var humanPlayer = game.playerOne;
         var origState = game.board.getMatrix();   
-        var depth = 0; 
-        //console.log(state);
+        var depth = 0;
 
         var bestMove = minMax(origState, depth, humanPlayer).index;
 
