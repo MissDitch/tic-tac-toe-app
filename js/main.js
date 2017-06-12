@@ -30,7 +30,7 @@ function Board() {
       matrix = self.getMatrix();
       //check rows
       for (var i = 0; i <= 6; i = i + 3) {
-        if (matrix[i] === icon && matrix[i + 1] === matrix[i] && matrix[i + 2] === matrix[i]) {
+        if (matrix[i] === icon && matrix[i + 1] === icon && matrix[i + 2] === icon) {
           game.showWinner(icon, i, i+1, i+2);
           //console.log("row: " + i + ", " + (i+1) + ", "+ (i+2));
           return;
@@ -38,7 +38,7 @@ function Board() {
       }
       // check columns
       for (var i = 0; i <= 2; i++) {
-        if (matrix[i] === icon && matrix[i + 3] === matrix[i] && matrix[i + 6] === matrix[i]) {
+        if (matrix[i] === icon && matrix[i + 3] === icon && matrix[i + 6] === icon) {
           game.showWinner(icon, i, i+3, i+6);
           //console.log("column: " + i + ", " + (i+3) + ", "+ (i+6));
           return;
@@ -46,7 +46,7 @@ function Board() {
       }
       //check diagonals
       for (var i = 0, j = 4; i <= 2; i = i+2, j = j - 2) {
-        if (matrix[i] === icon && matrix[i + j] === matrix[i] && matrix[i + 2*j] === matrix[i]) {
+        if (matrix[i] === icon && matrix[i + j] === icon && matrix[i + 2*j] === icon) {
           game.showWinner(icon, i, i+j, i+2*j);
           //console.log("diagonal: " + i + ", " + (i+j) + ", "+ (i+2*j));
           return;
@@ -261,17 +261,17 @@ function AI(id, name, icon) {
         icon = player.icon,
         checkRows = function(state, icon) {
             for (var i = 0; i <= 6; i = i + 3) {
-                if (state[i] === icon && state[i + 1] === state[i] && state[i + 2] === state[i]) { return true; }
+                if (state[i] === icon && state[i + 1] === icon && state[i + 2] === icon) { return true; }
             }
         },
         checkColumns = function(state, icon) {
             for (var i = 0; i <= 2; i++) {
-                if (state[i] === icon && state[i + 3] === state[i] && state[i + 6] === state[i]) { return true; }
+                if (state[i] === icon && state[i + 3] === icon && state[i + 6] === icon) { return true; }
             }
         },
         checkDiagonals = function(state, icon) {
             for (var i = 0, j = 4; i <= 2; i = i+2, j = j - 2) {
-                if (state[i] === icon && state[i + j] === state[i] && state[i + 2*j] === state[i]) { return true; }
+                if (state[i] === icon && state[i + j] === icon && state[i + 2*j] === icon) { return true; }
             }
         };
         if (checkRows(state, icon) || checkColumns(state, icon) || checkDiagonals(state, icon)) { return true;}
