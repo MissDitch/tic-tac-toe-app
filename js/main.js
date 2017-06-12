@@ -289,7 +289,7 @@ function AI(id, name, icon) {
         if (player.name === "Player 1" && winningCombi(newState, player)) { return {score:(-10 + depth)}; }
         else if (player.name === "Computer"  && winningCombi(newState, player)) { return {score:(10 - depth)}; }
         else if (availableSpots.length === 0 ) { return {score:0}; }
-        else {
+    //    else {
         depth++;
         var moves = [];
         for (var i = 0; i < availableSpots.length; i++) {
@@ -318,7 +318,10 @@ function AI(id, name, icon) {
             // reset the spot to empty
             newState[availableSpots[i]] = move.index;
             //push the object to the array;
+            var date = new Date();
+            console.log( player.name + "(with " + availableSpots.length + "available spots), move pushed to moves array at depth: " + depth + " and time: "+ date.getMilliseconds() );
             moves.push(move);
+            console.log(moves);
         }
         // if it is the computer's turn loop over the moves and choose the move with the highest score
         var bestMove;
@@ -347,7 +350,7 @@ function AI(id, name, icon) {
         console.log ("best move: ");
         console.log (moves[bestMove]);
         return moves[bestMove];
-        }
+       // }
     },
     takeBlindMove = function() {
         setTimeout(function() {
