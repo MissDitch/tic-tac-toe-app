@@ -344,29 +344,8 @@ function winningCombi(state, player) {
         else { return false; }
     }
 
-function minMax(newState, depth, player) { 
-     winningCombi = function(state, player) {  
-        var state = state,
-        icon = player.icon,
-        checkRows = function(state, icon) {
-            for (var i = 0; i <= 6; i = i + 3) {
-                if (state[i] === icon && state[i + 1] === state[i] && state[i + 2] === state[i]) { return true; }
-            }
-        },
-        checkColumns = function(state, icon) {
-            for (var i = 0; i <= 2; i++) {
-                if (state[i] === icon && state[i + 3] === state[i] && state[i + 6] === state[i]) { return true; }
-            }
-        },
-        checkDiagonals = function(state, icon) {
-            for (var i = 0, j = 4; i <= 2; i = i+2, j = j - 2) {
-                if (state[i] === icon && state[i + j] === state[i] && state[i + 2*j] === state[i]) { return true; }
-            }
-        };
-        if (checkRows(state, icon) || checkColumns(state, icon) || checkDiagonals(state, icon)) { return true;}
-        else { return false; }
-    },
-    minMax = function(newState, depth, player, moves) { 
+function minMax(newState, depth, player, moves) { 
+    
         var availableSpots = emptyIndexes(newState);
         var moves = moves;
      //   console.log("available spots: ");
@@ -445,5 +424,5 @@ var player = {id: 1, name: "Computer", icon: "O"};
 
 var depth = 0;
 var moves = [];
-var bestMove = minMax(board, depth, player, moves).index;
-//bestMove
+minMax(board, depth, player, moves).index;
+

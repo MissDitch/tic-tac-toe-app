@@ -277,6 +277,53 @@ function AI(id, name, icon) {
         if (checkRows(state, icon) || checkColumns(state, icon) || checkDiagonals(state, icon)) { return true;}
         else { return false; }
     },
+    evaluateBoard = function(origState, aiPlayer, humanPlayer) {
+        var icon = aiPlayer.icon,
+        newState = origState,
+        nowAvailable,
+        available = emptyIndexes(newState),
+        bestMove,
+        bestMoveFound = false;
+        for (var i = 0; i < available.length; i++) {
+            if (!bestMoveFound) {
+            console.log("available: ");
+             console.log(available);
+           // put icon on every available spot
+            newState[available[i]] = icon;
+            nowAvailable = emptyIndexes(newState);
+             console.log("now available: ");
+             console.log(nowAvailable);
+            var oppIcon = humanPlayer.icon;
+            for (var j = 0; j < nowAvailable.length; j++) {
+                // put opponent's icon on every available spot
+                newState[nowAvailable[j]] = oppIcon;
+                if (winningCombi(newState, oppIcon)) {
+                    bestMove = newState[nowAvailable[j]];
+                    bestMoveFound = true;
+                    break;
+                }
+                 // reset the spot to empty
+                newState[available[j]] = available[j];
+                }
+           
+             // reset the spot to empty
+            newState[available[i]] = available[i];
+             }
+        }
+        
+        if (!bestMove) {
+            var random = Math.floor(Math.random() * available.length);
+            bestMove = available[random];                 
+        }
+        console.log(bestMove);
+
+        game.board.setMatrix(bestMove, icon);
+       document.getElementById(bestMove).textContent = icon;
+       game.board.checkIfTerminated(icon);
+         game.board.playerOnePlays = true;
+        game.nextTurn(); 
+        
+    }
     minMax = function(newState, depth, player) { 
         var availableSpots = emptyIndexes(newState);  
         
@@ -285,7 +332,7 @@ function AI(id, name, icon) {
         if (player.name === "Player 1" && winningCombi(newState, player)) { return {score:(-10 + depth)}; }
         else if (player.name === "Computer"  && winningCombi(newState, player)) { return {score:(10 - depth)}; }
         else if (availableSpots.length === 0 ) { return {score:0}; }
-    //    else {
+         //    else {
         depth++;
         var moves = [];
         for (var i = 0; i < availableSpots.length; i++) {
@@ -374,15 +421,12 @@ function AI(id, name, icon) {
         var aiPlayer = game.playerTwo;
         var humanPlayer = game.playerOne;
         var origState = game.board.getMatrix();   
-        var depth = 0;
+        evaluateBoard(origState, aiPlayer, humanPlayer);
 
-        var bestMove = minMax(origState, depth, humanPlayer).index;
 
-        game.board.setMatrix(bestMove, self.icon);
-        document.getElementById(bestMove).textContent = self.icon;
-        game.board.checkIfTerminated(self.icon);
-        game.board.playerOnePlays = true;
-        game.nextTurn();
+        //var bestMove = minMax(origState, depth, humanPlayer).index;
+
+       
     }
 
     this.id = id;
