@@ -277,6 +277,7 @@ function AI(id, name, icon) {
         if (checkRows(state, icon) || checkColumns(state, icon) || checkDiagonals(state, icon)) { return true;}
         else { return false; }
     },
+    // based on ahmad abdolsaheb's article: https://medium.freecodecamp.com/how-to-make-your-tic-tac-toe-game-unbeatable-by-using-the-minimax-algorithm-9d690bad4b37   
     minMax = function(newState, depth, player) { 
         var availableSpots = emptyIndexes(newState);  
         
