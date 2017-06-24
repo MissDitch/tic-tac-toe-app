@@ -287,12 +287,12 @@ function AI(id, name, icon) {
         for (var i = 0; i < available.length; i++) {
             if (!bestMoveFound) {
             console.log("available: ");
-             console.log(available);
+            console.log(available);
            // put icon on every available spot
             newState[available[i]] = icon;
             nowAvailable = emptyIndexes(newState);
-             console.log("now available: ");
-             console.log(nowAvailable);
+            console.log("now available: ");
+            console.log(nowAvailable);
             var oppIcon = humanPlayer.icon;
             for (var j = 0; j < nowAvailable.length; j++) {
                 // put opponent's icon on every available spot
@@ -308,7 +308,7 @@ function AI(id, name, icon) {
            
              // reset the spot to empty
             newState[available[i]] = available[i];
-             }
+            }
         }
         
         if (!bestMove) {
@@ -318,12 +318,13 @@ function AI(id, name, icon) {
         console.log(bestMove);
 
         game.board.setMatrix(bestMove, icon);
-       document.getElementById(bestMove).textContent = icon;
-       game.board.checkIfTerminated(icon);
-         game.board.playerOnePlays = true;
+        document.getElementById(bestMove).textContent = icon;
+        game.board.checkIfTerminated(icon);
+        game.board.playerOnePlays = true;
         game.nextTurn(); 
         
-    }
+    },
+    // based on ahmad abdolsaheb's article: https://medium.freecodecamp.com/how-to-make-your-tic-tac-toe-game-unbeatable-by-using-the-minimax-algorithm-9d690bad4b37    
     minMax = function(newState, depth, player) { 
         var availableSpots = emptyIndexes(newState);  
         
